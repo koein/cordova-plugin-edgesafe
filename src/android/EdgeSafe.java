@@ -39,6 +39,13 @@ public class EdgeSafe extends CordovaPlugin {
     private int lastL = 0, lastT = 0, lastR = 0, lastB = 0;
     private CallbackContext watchCallback;
 
+    // last runtime-applied settings
+    private String lastStatusColor = null;
+    private String lastNavColor = null;
+    private String lastDividerColor = null;
+    private Boolean lastLightStatus = null;
+    private Boolean lastLightNav = null;
+
     @Override
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
         super.initialize(cordova, webView);
@@ -76,6 +83,8 @@ public class EdgeSafe extends CordovaPlugin {
 
     // --- Icon contrast ---
     private void applyIconAppearance(Window window, View content, boolean lightStatus, boolean lightNav) {
+        lastLightStatus = lightStatus;
+        lastLightNav = lightNav;
         WindowInsetsControllerCompat controller =
                 new WindowInsetsControllerCompat(window, content);
         try { controller.setAppearanceLightStatusBars(lightStatus); } catch (Throwable ignore) {}
@@ -96,19 +105,25 @@ public class EdgeSafe extends CordovaPlugin {
 
     private void applyColors(Window window, String status, String nav, String navDivider) {
         try { window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS); } catch (Throwable ignore) {}
+        try { window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS); } catch (Throwable ignore) {}
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Integer s = parseColorMaybe(status);
             Integer n = parseColorMaybe(nav);
             if (s != null) {
                 try { window.setStatusBarColor(s); } catch (Throwable ignore) {}
+                lastStatusColor = status;
+                if (s != Color.TRANSPARENT) transparentBars = false;
             }
             if (n != null) {
                 try { window.setNavigationBarColor(n); } catch (Throwable ignore) {}
+                lastNavColor = nav;
+                if (n != Color.TRANSPARENT) transparentBars = false;
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 Integer d = parseColorMaybe(navDivider);
                 if (d != null) {
                     try { window.setNavigationBarDividerColor(d); } catch (Throwable ignore) {}
+                    lastDividerColor = navDivider;
                 }
             }
         }
@@ -195,6 +210,15 @@ public class EdgeSafe extends CordovaPlugin {
 
             lastL = l; lastT = t; lastR = r; lastB = b;
             sendInsetsToJs(l, t, r, b);
+
+            // Re-assert colors/icons if they were set at runtime
+            if (lastStatusColor != null || lastNavColor != null || lastDividerColor != null) {
+                applyColors(cordova.getActivity().getWindow(), lastStatusColor, lastNavColor, lastDividerColor);
+            }
+            if (lastLightStatus != null || lastLightNav != null) {
+                applyIconAppearance(cordova.getActivity().getWindow(), v, lastLightStatus != null ? lastLightStatus : lightStatusIcons, lastLightNav != null ? lastLightNav : lightNavIcons);
+            }
+
             return insets;
         });
         ViewCompat.requestApplyInsets(content);
@@ -247,14 +271,17 @@ public class EdgeSafe extends CordovaPlugin {
             // Colors (individual)
             case "statusBarColor":
                 final String s = args.isNull(0) ? null : args.optString(0, null);
+                lastStatusColor = s;
                 cordova.getActivity().runOnUiThread(() -> applyColors(cordova.getActivity().getWindow(), s, null, null));
                 cb.success(); return true;
             case "navBarColor":
                 final String n = args.isNull(0) ? null : args.optString(0, null);
+                lastNavColor = n;
                 cordova.getActivity().runOnUiThread(() -> applyColors(cordova.getActivity().getWindow(), null, n, null));
                 cb.success(); return true;
             case "navBarDividerColor":
                 final String d = args.isNull(0) ? null : args.optString(0, null);
+                lastDividerColor = d;
                 cordova.getActivity().runOnUiThread(() -> applyColors(cordova.getActivity().getWindow(), null, null, d));
                 cb.success(); return true;
 
@@ -275,6 +302,7 @@ public class EdgeSafe extends CordovaPlugin {
                 String sb = args.isNull(0) ? null : args.optString(0, null);
                 String nb = args.isNull(1) ? null : args.optString(1, null);
                 String db = args.isNull(2) ? null : args.optString(2, null);
+                lastStatusColor = sb; lastNavColor = nb; lastDividerColor = db;
                 final Window w = cordova.getActivity().getWindow();
                 cordova.getActivity().runOnUiThread(() -> applyColors(w, sb, nb, db));
                 cb.success(); return true;
