@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<plugin id="cordova-plugin-edgesafe" version="1.1.0"
+<plugin id="cordova-plugin-edgesafe" version="1.2.0"
         xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android">
 
   <name>Edge Safe</name>
-  <description>Edge-to-edge safety for Cordova WebView on Android. WindowInsets padding with optional legacy fit mode.</description>
+  <description>Android edge-to-edge safety for Cordova WebView. Default = FIT (below status bar / above nav). Switchable to EDGE.</description>
   <license>MIT</license>
   <keywords>cordova, android, windowinsets, edge-to-edge, safe-area</keywords>
 
@@ -19,26 +19,25 @@
   </js-module>
 
   <platform name="android">
-    <!-- Add AndroidX Core for WindowCompat/ViewCompat -->
+    <!-- AndroidX core for WindowCompat/ViewCompat -->
     <framework src="androidx.core:core:1.13.1" />
 
-    <!-- Register the native class with Cordova -->
+    <!-- Register native class -->
     <config-file target="res/xml/config.xml" parent="/*">
       <feature name="EdgeSafe">
         <param name="android-package" value="com.weevi.edgesafe.EdgeSafe" />
       </feature>
     </config-file>
 
-    <!-- Optional plugin preferences (override in app config.xml) -->
+    <!-- Plugin preferences (override in app config.xml) -->
+    <preference name="EdgeSafeMode" default="fit" /> <!-- fit | edge -->
     <preference name="EdgeSafeApplyPadding" default="true" />
     <preference name="EdgeSafePadTop" default="true" />
     <preference name="EdgeSafePadBottom" default="true" />
     <preference name="EdgeSafePadSides" default="true" />
-    <preference name="EdgeSafeTransparentBars" default="true" />
+    <preference name="EdgeSafeTransparentBars" default="false" />
     <preference name="EdgeSafeLightStatusBarIcons" default="true" />
     <preference name="EdgeSafeLightNavBarIcons" default="true" />
-    <!-- Edge or fit (legacy below-bars) -->
-    <preference name="EdgeSafeMode" default="edge" />
 
     <source-file src="src/android/EdgeSafe.java" target-dir="src/com/weevi/edgesafe" />
   </platform>
