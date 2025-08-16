@@ -22,10 +22,6 @@ var EdgeSafe = {
     }, function () {}, 'EdgeSafe', 'getInsets', []);
   },
 
-  setApplyPadding: function (enabled) {
-    exec(function () {}, function () {}, 'EdgeSafe', 'setApplyPadding', [!!enabled]);
-  },
-
   setMode: function (mode /* 'fit' | 'edge' */) {
     exec(function () {}, function () {}, 'EdgeSafe', 'setMode', [mode || 'fit']);
   }

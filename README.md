@@ -1,7 +1,7 @@
 # cordova-plugin-edgesafe
 
-Android edge-to-edge safety for Cordova WebView. **Default mode = `fit`** (WebView below status bar, above nav bar).
-`fit` now clears system UI overlay flags that other plugins might set (e.g., statusbar immersive). Switch to `edge` for true edge-to-edge + padding via WindowInsets.
+Android edge-to-edge safety for Cordova WebView. **Default = `fit`** (below bars).  
+**EDGE mode now applies layout MARGINS equal to system bar insets**, so even `position:fixed` headers/footers stay inside the safe area without any app CSS changes.
 
 ## Install
 ```bash
@@ -11,33 +11,24 @@ cordova plugin add https://github.com/<you>/cordova-plugin-edgesafe.git
 ```
 
 ## Configure (optional)
-Default is `fit`. Override in `config.xml`:
 ```xml
 <preference name="EdgeSafeMode" value="fit" />   <!-- or 'edge' -->
 <preference name="EdgeSafeTransparentBars" value="false" />
 <preference name="EdgeSafeForceOpaqueBars" value="false" />
 ```
-When using `edge`, you can also tweak:
-```xml
-<preference name="EdgeSafeApplyPadding" value="true"/>
-<preference name="EdgeSafePadTop" value="true"/>
-<preference name="EdgeSafePadBottom" value="true"/>
-<preference name="EdgeSafePadSides" value="true"/>
-```
 
-## Runtime API
+## Runtime
 ```js
 document.addEventListener('deviceready', function () {
   // FIT (default): no CSS changes required
   cordova.plugins.edgeSafe.setMode('fit');
 
-  // Or go EDGE (translucent bars + insets)
+  // EDGE (content under bars, but WebView shrinks using margins)
   // cordova.plugins.edgeSafe.setMode('edge');
-  // cordova.plugins.edgeSafe.watch(); // to keep --safe-* CSS vars updated
 });
 ```
 
 ### Notes
 - Keep `<preference name="fullScreen" value="false" />` for Android.
-- With `fit` mode, leave `StatusBarOverlaysWebView` **false** (or omit it).
-- Keyboard is handled (`adjustResize`) at runtime.
+- With `fit`, leave `StatusBarOverlaysWebView` **false** (or omit).
+- Keyboard uses `adjustResize` at runtime.

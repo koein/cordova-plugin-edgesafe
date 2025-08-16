@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.graphics.Color;
 import android.os.Build;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -25,9 +26,7 @@ import androidx.core.view.WindowInsetsControllerCompat;
 
 public class EdgeSafe extends CordovaPlugin {
 
-    private boolean applyPadding = true;
-    private boolean padTop = true, padBottom = true, padSides = true;
-    private boolean transparentBars = false; // default false in FIT
+    private boolean transparentBars = false;
     private boolean lightStatusIcons = true, lightNavIcons = true;
     private boolean forceOpaqueBars = false;
 
@@ -39,13 +38,8 @@ public class EdgeSafe extends CordovaPlugin {
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
         super.initialize(cordova, webView);
 
-        // Preferences (override via app config.xml)
         String mode = preferences.getString("EdgeSafeMode", "fit");
         fitMode          = !"edge".equalsIgnoreCase(mode);
-        applyPadding     = preferences.getBoolean("EdgeSafeApplyPadding", true);
-        padTop           = preferences.getBoolean("EdgeSafePadTop", true);
-        padBottom        = preferences.getBoolean("EdgeSafePadBottom", true);
-        padSides         = preferences.getBoolean("EdgeSafePadSides", true);
         transparentBars  = preferences.getBoolean("EdgeSafeTransparentBars", false);
         lightStatusIcons = preferences.getBoolean("EdgeSafeLightStatusBarIcons", true);
         lightNavIcons    = preferences.getBoolean("EdgeSafeLightNavBarIcons", true);
@@ -55,7 +49,6 @@ public class EdgeSafe extends CordovaPlugin {
         final Window window = activity.getWindow();
 
         cordova.getActivity().runOnUiThread(() -> {
-            // Ensure keyboard resizes WebView (runtime to avoid manifest conflicts)
             try {
                 window.setSoftInputMode(
                     WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
@@ -63,13 +56,11 @@ public class EdgeSafe extends CordovaPlugin {
                 );
             } catch (Throwable ignore) {}
 
-            // Icon appearance (works for both modes)
             WindowInsetsControllerCompat controller =
                     new WindowInsetsControllerCompat(window, webView.getView());
             try { controller.setAppearanceLightStatusBars(lightStatusIcons); } catch (Throwable ignore) {}
             try { controller.setAppearanceLightNavigationBars(lightNavIcons); } catch (Throwable ignore) {}
 
-            // Apply initial mode
             applyMode(window, webView.getView(), fitMode);
         });
     }
@@ -78,7 +69,6 @@ public class EdgeSafe extends CordovaPlugin {
         try {
             final View decor = window.getDecorView();
             int flags = decor.getSystemUiVisibility();
-            // Clear layout/immersive flags that force content under bars
             flags &= ~View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
             flags &= ~View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
             flags &= ~View.SYSTEM_UI_FLAG_FULLSCREEN;
@@ -89,9 +79,7 @@ public class EdgeSafe extends CordovaPlugin {
         } catch (Throwable ignore) {}
 
         try {
-            // Ensure we can draw system bar backgrounds (so bars are real surfaces)
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            // Remove deprecated translucent flags if any
             window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
             window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
         } catch (Throwable ignore) {}
@@ -105,18 +93,30 @@ public class EdgeSafe extends CordovaPlugin {
         }
     }
 
+    private void setMargins(View v, int l, int t, int r, int b) {
+        try {
+            ViewGroup.LayoutParams p = v.getLayoutParams();
+            if (p instanceof ViewGroup.MarginLayoutParams) {
+                ViewGroup.MarginLayoutParams mp = (ViewGroup.MarginLayoutParams) p;
+                if (mp.leftMargin != l || mp.topMargin != t || mp.rightMargin != r || mp.bottomMargin != b) {
+                    mp.leftMargin = l;
+                    mp.topMargin = t;
+                    mp.rightMargin = r;
+                    mp.bottomMargin = b;
+                    v.setLayoutParams(mp);
+                }
+            }
+        } catch (Throwable ignore) {}
+    }
+
     private void applyMode(Window window, View content, boolean fit) {
         if (fit) {
-            // Classic layout: content BELOW bars (no per-element CSS needed)
             WindowCompat.setDecorFitsSystemWindows(window, true);
             clearOverlayFlags(window);
             maybeForceOpaqueBars(window);
-            // No native padding needed
-            content.setPadding(0,0,0,0);
-            // Stream zeros (or OEM-provided; we normalize to zero)
+            setMargins(content, 0, 0, 0, 0);
             attachInsetsListener(content, /*edgeMode*/ false);
         } else {
-            // True edge-to-edge: content under bars (we'll pad with insets)
             WindowCompat.setDecorFitsSystemWindows(window, false);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && transparentBars) {
                 try { window.setStatusBarColor(Color.TRANSPARENT); } catch (Throwable ignore) {}
@@ -131,26 +131,21 @@ public class EdgeSafe extends CordovaPlugin {
         ViewCompat.setOnApplyWindowInsetsListener(content, (v, insets) -> {
             Insets sys = insets.getInsets(WindowInsetsCompat.Type.systemBars());
 
-            int l = padSides ? sys.left : 0;
-            int t = padTop   ? sys.top  : 0;
-            int r = padSides ? sys.right: 0;
-            int b = padBottom? sys.bottom:0;
+            int l = sys.left;
+            int t = sys.top;
+            int r = sys.right;
+            int b = sys.bottom;
 
             if (!edgeMode) {
-                // In FIT mode, Android already lays out below bars; normalize to zeros.
                 l = t = r = b = 0;
+            } else {
+                setMargins(v, l, t, r, b); // shrink WebView via margins so viewport is safe
             }
 
             lastL = l; lastT = t; lastR = r; lastB = b;
 
-            if (edgeMode && applyPadding) {
-                v.setPadding(l, t, r, b);
-            } else if (!edgeMode) {
-                v.setPadding(0,0,0,0);
-            }
-
             sendInsetsToJs(l, t, r, b);
-            return insets; // don't consume; IME continues to work
+            return insets;
         });
         ViewCompat.requestApplyInsets(content);
     }
@@ -187,16 +182,6 @@ public class EdgeSafe extends CordovaPlugin {
                 obj.put("right", lastR);
                 obj.put("bottom", lastB);
                 cb.success(obj);
-                return true;
-
-            case "setApplyPadding":
-                applyPadding = args.optBoolean(0, true);
-                final View v = webView.getView();
-                cordova.getActivity().runOnUiThread(() -> {
-                    if (applyPadding) v.setPadding(lastL, lastT, lastR, lastB);
-                    else v.setPadding(0, 0, 0, 0);
-                });
-                cb.success();
                 return true;
 
             case "setMode":
