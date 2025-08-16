@@ -1,7 +1,7 @@
 {
   "name": "cordova-plugin-edgesafe",
-  "version": "1.2.0",
-  "description": "Cordova plugin: Android edge-to-edge safety. Default FIT (below bars), switchable to EDGE with insets.",
+  "version": "1.2.1",
+  "description": "Cordova plugin: Android edge-to-edge safety. Default FIT (below bars) with hard flag clearing; switchable to EDGE with insets.",
   "license": "MIT",
   "author": "weevi / walid",
   "homepage": "https://github.com/weevi/cordova-plugin-edgesafe",

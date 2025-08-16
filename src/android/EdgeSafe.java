@@ -29,6 +29,7 @@ public class EdgeSafe extends CordovaPlugin {
     private boolean padTop = true, padBottom = true, padSides = true;
     private boolean transparentBars = false; // default false in FIT
     private boolean lightStatusIcons = true, lightNavIcons = true;
+    private boolean forceOpaqueBars = false;
 
     private boolean fitMode = true; // default FIT
     private int lastL = 0, lastT = 0, lastR = 0, lastB = 0;
@@ -48,6 +49,7 @@ public class EdgeSafe extends CordovaPlugin {
         transparentBars  = preferences.getBoolean("EdgeSafeTransparentBars", false);
         lightStatusIcons = preferences.getBoolean("EdgeSafeLightStatusBarIcons", true);
         lightNavIcons    = preferences.getBoolean("EdgeSafeLightNavBarIcons", true);
+        forceOpaqueBars  = preferences.getBoolean("EdgeSafeForceOpaqueBars", false);
 
         final Activity activity = cordova.getActivity();
         final Window window = activity.getWindow();
@@ -72,17 +74,46 @@ public class EdgeSafe extends CordovaPlugin {
         });
     }
 
+    private void clearOverlayFlags(Window window) {
+        try {
+            final View decor = window.getDecorView();
+            int flags = decor.getSystemUiVisibility();
+            // Clear layout/immersive flags that force content under bars
+            flags &= ~View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+            flags &= ~View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+            flags &= ~View.SYSTEM_UI_FLAG_FULLSCREEN;
+            flags &= ~View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+            flags &= ~View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+            flags &= ~View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
+            decor.setSystemUiVisibility(flags);
+        } catch (Throwable ignore) {}
+
+        try {
+            // Ensure we can draw system bar backgrounds (so bars are real surfaces)
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            // Remove deprecated translucent flags if any
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+        } catch (Throwable ignore) {}
+    }
+
+    private void maybeForceOpaqueBars(Window window) {
+        if (!forceOpaqueBars) return;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            try { window.setStatusBarColor(Color.BLACK); } catch (Throwable ignore) {}
+            try { window.setNavigationBarColor(Color.BLACK); } catch (Throwable ignore) {}
+        }
+    }
+
     private void applyMode(Window window, View content, boolean fit) {
         if (fit) {
             // Classic layout: content BELOW bars (no per-element CSS needed)
             WindowCompat.setDecorFitsSystemWindows(window, true);
-            // Do not force transparent bars in FIT (use system default colors)
-            try { if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                // leave system colors as-is
-            }} catch (Throwable ignore) {}
+            clearOverlayFlags(window);
+            maybeForceOpaqueBars(window);
             // No native padding needed
             content.setPadding(0,0,0,0);
-            // Still attach listener to stream zeros (or any OEM-provided insets)
+            // Stream zeros (or OEM-provided; we normalize to zero)
             attachInsetsListener(content, /*edgeMode*/ false);
         } else {
             // True edge-to-edge: content under bars (we'll pad with insets)
@@ -106,7 +137,7 @@ public class EdgeSafe extends CordovaPlugin {
             int b = padBottom? sys.bottom:0;
 
             if (!edgeMode) {
-                // In FIT mode, Android already lays out below bars; use zeros.
+                // In FIT mode, Android already lays out below bars; normalize to zeros.
                 l = t = r = b = 0;
             }
 

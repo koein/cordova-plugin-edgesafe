@@ -1,7 +1,7 @@
 # cordova-plugin-edgesafe
 
 Android edge-to-edge safety for Cordova WebView. **Default mode = `fit`** (WebView below status bar, above nav bar).
-Switch to `edge` for true edge-to-edge + padding via WindowInsets.
+`fit` now clears system UI overlay flags that other plugins might set (e.g., statusbar immersive). Switch to `edge` for true edge-to-edge + padding via WindowInsets.
 
 ## Install
 ```bash
@@ -15,6 +15,7 @@ Default is `fit`. Override in `config.xml`:
 ```xml
 <preference name="EdgeSafeMode" value="fit" />   <!-- or 'edge' -->
 <preference name="EdgeSafeTransparentBars" value="false" />
+<preference name="EdgeSafeForceOpaqueBars" value="false" />
 ```
 When using `edge`, you can also tweak:
 ```xml
@@ -32,21 +33,11 @@ document.addEventListener('deviceready', function () {
 
   // Or go EDGE (translucent bars + insets)
   // cordova.plugins.edgeSafe.setMode('edge');
-  // cordova.plugins.edgeSafe.watch(); // to keep CSS vars updated
+  // cordova.plugins.edgeSafe.watch(); // to keep --safe-* CSS vars updated
 });
 ```
 
-If you use `edge`, optional CSS:
-```css
-.app {
-  padding-top: var(--safe-top, 0);
-  padding-right: var(--safe-right, 0);
-  padding-bottom: var(--safe-bottom, 0);
-  padding-left: var(--safe-left, 0);
-}
-```
-
-## Notes
+### Notes
 - Keep `<preference name="fullScreen" value="false" />` for Android.
 - With `fit` mode, leave `StatusBarOverlaysWebView` **false** (or omit it).
 - Keyboard is handled (`adjustResize`) at runtime.

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<plugin id="cordova-plugin-edgesafe" version="1.2.0"
+<plugin id="cordova-plugin-edgesafe" version="1.2.1"
         xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android">
 
   <name>Edge Safe</name>
-  <description>Android edge-to-edge safety for Cordova WebView. Default = FIT (below status bar / above nav). Switchable to EDGE.</description>
+  <description>Android edge-to-edge safety for Cordova WebView. Default = FIT (below status bar / above nav). Switchable to EDGE. FIT now clears overlay flags.</description>
   <license>MIT</license>
   <keywords>cordova, android, windowinsets, edge-to-edge, safe-area</keywords>
 
@@ -38,6 +38,7 @@
     <preference name="EdgeSafeTransparentBars" default="false" />
     <preference name="EdgeSafeLightStatusBarIcons" default="true" />
     <preference name="EdgeSafeLightNavBarIcons" default="true" />
+    <preference name="EdgeSafeForceOpaqueBars" default="false" />
 
     <source-file src="src/android/EdgeSafe.java" target-dir="src/com/weevi/edgesafe" />
   </platform>
