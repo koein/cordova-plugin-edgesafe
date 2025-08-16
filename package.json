@@ -1,0 +1,21 @@
+{
+  "name": "cordova-plugin-edgesafe",
+  "version": "1.0.0",
+  "description": "Cordova plugin: WindowInsets padding for Android edge-to-edge (SDK 35+).",
+  "license": "MIT",
+  "author": "weevi / walid",
+  "homepage": "https://github.com/weevi/cordova-plugin-edgesafe",
+  "keywords": [
+    "cordova",
+    "android",
+    "insets",
+    "edge-to-edge",
+    "safe-area"
+  ],
+  "cordova": {
+    "id": "cordova-plugin-edgesafe",
+    "platforms": [
+      "android"
+    ]
+  }
+}
