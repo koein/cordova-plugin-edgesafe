@@ -30,6 +30,8 @@ public class EdgeSafe extends CordovaPlugin {
     private boolean transparentBars = true;
     private boolean lightStatusIcons = true, lightNavIcons = true;
 
+    private boolean fitMode = false; // false=edge (edge-to-edge), true=fit (below bars)
+
     private int lastL = 0, lastT = 0, lastR = 0, lastB = 0;
     private CallbackContext watchCallback;
 
@@ -46,19 +48,13 @@ public class EdgeSafe extends CordovaPlugin {
         lightStatusIcons = preferences.getBoolean("EdgeSafeLightStatusBarIcons", true);
         lightNavIcons    = preferences.getBoolean("EdgeSafeLightNavBarIcons", true);
 
-        final Activity activity = cordova.getActivity();
-        final Window window = activity.getWindow();
+        String mode = preferences.getString("EdgeSafeMode", "edge");
+        fitMode = "fit".equalsIgnoreCase(mode);
+
+        final Window window = cordova.getActivity().getWindow();
 
         cordova.getActivity().runOnUiThread(() -> {
-            // Opt-in to edge-to-edge
-            WindowCompat.setDecorFitsSystemWindows(window, false);
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && transparentBars) {
-                try { window.setStatusBarColor(Color.TRANSPARENT); } catch (Throwable ignore) {}
-                try { window.setNavigationBarColor(Color.TRANSPARENT); } catch (Throwable ignore) {}
-            }
-
-            // Ensure keyboard resizes the WebView without needing manifest <edit-config>
+            // Keyboard should resize the WebView
             try {
                 window.setSoftInputMode(
                     WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
@@ -66,20 +62,50 @@ public class EdgeSafe extends CordovaPlugin {
                 );
             } catch (Throwable ignore) {}
 
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && transparentBars) {
+                try { window.setStatusBarColor(Color.TRANSPARENT); } catch (Throwable ignore) {}
+                try { window.setNavigationBarColor(Color.TRANSPARENT); } catch (Throwable ignore) {}
+            }
+
             WindowInsetsControllerCompat controller =
                     new WindowInsetsControllerCompat(window, webView.getView());
             try { controller.setAppearanceLightStatusBars(lightStatusIcons); } catch (Throwable ignore) {}
             try { controller.setAppearanceLightNavigationBars(lightNavIcons); } catch (Throwable ignore) {}
 
-            attachInsetsListener();
+            applyMode();       // sets decorFits and padding mode
+            attachInsetsListener(); // starts watching insets (no-op in fit mode)
         });
+    }
+
+    private void applyMode() {
+        final Window window = cordova.getActivity().getWindow();
+        if (fitMode) {
+            // Legacy: content sits below system bars (no edge-to-edge)
+            WindowCompat.setDecorFitsSystemWindows(window, true);
+            // No native padding needed
+            applyPadding = false;
+            // ensure zero padding
+            final View v = webView.getView();
+            v.setPadding(0,0,0,0);
+        } else {
+            // Proper edge-to-edge; we will pad with insets
+            WindowCompat.setDecorFitsSystemWindows(window, false);
+            // allow native padding if enabled
+            ViewCompat.requestApplyInsets(webView.getView());
+        }
     }
 
     private void attachInsetsListener() {
         final View content = webView.getView();
 
         ViewCompat.setOnApplyWindowInsetsListener(content, (v, insets) -> {
-            // Only system bars (status + nav). Don't include IME.
+            if (fitMode) {
+                // In fit mode we don't modify padding or stream updates (values will be near 0)
+                lastL = lastT = lastR = lastB = 0;
+                sendInsetsToJs(0,0,0,0);
+                return insets;
+            }
+
             Insets sys = insets.getInsets(WindowInsetsCompat.Type.systemBars());
 
             int l = padSides ? sys.left : 0;
@@ -118,7 +144,6 @@ public class EdgeSafe extends CordovaPlugin {
     public boolean execute(String action, JSONArray args, CallbackContext cb) throws JSONException {
         switch (action) {
             case "watch":
-                // Start streaming insets to JS (keeps callback)
                 watchCallback = cb;
                 PluginResult no = new PluginResult(PluginResult.Status.NO_RESULT);
                 no.setKeepCallback(true);
@@ -141,6 +166,13 @@ public class EdgeSafe extends CordovaPlugin {
                     if (applyPadding) v.setPadding(lastL, lastT, lastR, lastB);
                     else v.setPadding(0, 0, 0, 0);
                 });
+                cb.success();
+                return true;
+
+            case "setMode":
+                String mode = args.optString(0, "edge");
+                fitMode = "fit".equalsIgnoreCase(mode);
+                cordova.getActivity().runOnUiThread(this::applyMode);
                 cb.success();
                 return true;
         }

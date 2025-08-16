@@ -1,6 +1,6 @@
 # cordova-plugin-edgesafe
 
-Android edge-to-edge safety for Cordova WebView (SDK 35+). Applies WindowInsets as WebView padding and streams inset values to JS.
+Android edge-to-edge safety for Cordova WebView (SDK 35+). Applies WindowInsets as WebView padding, **or** switch to legacy *fit* mode to keep content below the system bars (no CSS changes).
 
 ## Install
 ```bash
@@ -9,27 +9,23 @@ cordova plugin add https://github.com/<you>/cordova-plugin-edgesafe.git
 # <plugin name="cordova-plugin-edgesafe" spec="https://github.com/<you>/cordova-plugin-edgesafe.git" />
 ```
 
+## Modes
+- **edge** (default): Edge-to-edge with proper padding based on insets.
+- **fit**: Legacy layout. Content starts **below** the status bar and ends **above** the navigation bar. No per-element CSS needed.
+
 ## Use
-Add to your `<head>`:
 ```html
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 ```
-
-Optional CSS using the variables the plugin sets:
-```css
-.app {
-  padding-top: var(--safe-top, 0);
-  padding-right: var(--safe-right, 0);
-  padding-bottom: var(--safe-bottom, 0);
-  padding-left: var(--safe-left, 0);
-}
-```
-
-Start watching on `deviceready`:
 ```js
 document.addEventListener('deviceready', function () {
   if (cordova?.plugins?.edgeSafe) {
-    cordova.plugins.edgeSafe.watch(); // sets CSS vars and streams updates
+    // Choose ONE:
+    // 1) Edge-to-edge (default)
+    cordova.plugins.edgeSafe.watch();
+
+    // 2) Legacy fit mode (content below bars) – no CSS needed
+    // cordova.plugins.edgeSafe.setMode('fit');
   }
 });
 ```
@@ -37,6 +33,7 @@ document.addEventListener('deviceready', function () {
 ## Config (optional)
 Override in your app `config.xml`:
 ```xml
+<preference name="EdgeSafeMode" value="edge" /> <!-- or 'fit' -->
 <preference name="EdgeSafeApplyPadding" value="true" />
 <preference name="EdgeSafePadTop" value="true" />
 <preference name="EdgeSafePadBottom" value="true" />
@@ -47,6 +44,6 @@ Override in your app `config.xml`:
 ```
 
 ## Notes
-- Do **not** set `<preference name="StatusBarOverlaysWebView" value="true" />` with this plugin.
-- Keep `<preference name="fullScreen" value="false" />` for Android.
-- Keyboard behavior (`adjustResize`) is now set at runtime to avoid manifest merge conflicts.
+- In **fit** mode the plugin calls `WindowCompat.setDecorFitsSystemWindows(window, true)` so the WebView is laid out below system bars.
+- In **edge** mode the plugin calls `WindowCompat.setDecorFitsSystemWindows(window, false)` and pads the WebView using `WindowInsets`.
+- Keep `<preference name="fullScreen" value="false" />` on Android.

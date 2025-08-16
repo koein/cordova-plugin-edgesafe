@@ -24,6 +24,14 @@ var EdgeSafe = {
 
   setApplyPadding: function (enabled) {
     exec(function () {}, function () {}, 'EdgeSafe', 'setApplyPadding', [!!enabled]);
+  },
+
+  /**
+   * 'edge' (default) = edge-to-edge + padding via insets
+   * 'fit'             = legacy: content below status/nav bars (no padding)
+   */
+  setMode: function (mode) {
+    exec(function () {}, function () {}, 'EdgeSafe', 'setMode', [mode === 'fit' ? 'fit' : 'edge']);
   }
 };
 

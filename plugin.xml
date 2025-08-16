@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<plugin id="cordova-plugin-edgesafe" version="1.0.1"
+<plugin id="cordova-plugin-edgesafe" version="1.1.0"
         xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android">
 
   <name>Edge Safe</name>
-  <description>Applies Android WindowInsets to Cordova WebView for edge-to-edge safety.</description>
+  <description>Edge-to-edge safety for Cordova WebView on Android. WindowInsets padding with optional legacy fit mode.</description>
   <license>MIT</license>
   <keywords>cordova, android, windowinsets, edge-to-edge, safe-area</keywords>
 
@@ -37,6 +37,8 @@
     <preference name="EdgeSafeTransparentBars" default="true" />
     <preference name="EdgeSafeLightStatusBarIcons" default="true" />
     <preference name="EdgeSafeLightNavBarIcons" default="true" />
+    <!-- Edge or fit (legacy below-bars) -->
+    <preference name="EdgeSafeMode" default="edge" />
 
     <source-file src="src/android/EdgeSafe.java" target-dir="src/com/weevi/edgesafe" />
   </platform>
