@@ -26,11 +26,11 @@ import androidx.core.view.WindowInsetsControllerCompat;
 
 public class EdgeSafe extends CordovaPlugin {
 
-    private boolean transparentBars = false;
+    private boolean transparentBars = true;
     private boolean lightStatusIcons = true, lightNavIcons = true;
     private boolean forceOpaqueBars = false;
 
-    private boolean fitMode = true; // default FIT
+    private boolean fitMode = false; // default EDGE now
     private int lastL = 0, lastT = 0, lastR = 0, lastB = 0;
     private CallbackContext watchCallback;
 
@@ -38,9 +38,9 @@ public class EdgeSafe extends CordovaPlugin {
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
         super.initialize(cordova, webView);
 
-        String mode = preferences.getString("EdgeSafeMode", "fit");
-        fitMode          = !"edge".equalsIgnoreCase(mode);
-        transparentBars  = preferences.getBoolean("EdgeSafeTransparentBars", false);
+        String mode = preferences.getString("EdgeSafeMode", "edge");
+        fitMode          = "fit".equalsIgnoreCase(mode);
+        transparentBars  = preferences.getBoolean("EdgeSafeTransparentBars", true);
         lightStatusIcons = preferences.getBoolean("EdgeSafeLightStatusBarIcons", true);
         lightNavIcons    = preferences.getBoolean("EdgeSafeLightNavBarIcons", true);
         forceOpaqueBars  = preferences.getBoolean("EdgeSafeForceOpaqueBars", false);
@@ -129,17 +129,18 @@ public class EdgeSafe extends CordovaPlugin {
 
     private void attachInsetsListener(View content, boolean edgeMode) {
         ViewCompat.setOnApplyWindowInsetsListener(content, (v, insets) -> {
-            Insets sys = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            Insets ime  = insets.getInsets(WindowInsetsCompat.Type.ime());
 
-            int l = sys.left;
-            int t = sys.top;
-            int r = sys.right;
-            int b = sys.bottom;
+            int l = bars.left;                          // IME doesn't add left/right
+            int t = bars.top;
+            int r = bars.right;
+            int b = Math.max(bars.bottom, ime.bottom);  // grow when keyboard is visible
 
             if (!edgeMode) {
-                l = t = r = b = 0;
+                l = t = r = b = 0;                      // FIT: normal layout, no margins
             } else {
-                setMargins(v, l, t, r, b); // shrink WebView via margins so viewport is safe
+                setMargins(v, l, t, r, b);              // EDGE: shrink viewport with margins
             }
 
             lastL = l; lastT = t; lastR = r; lastB = b;
@@ -185,8 +186,8 @@ public class EdgeSafe extends CordovaPlugin {
                 return true;
 
             case "setMode":
-                String mode = args.optString(0, "fit");
-                final boolean fit = !"edge".equalsIgnoreCase(mode);
+                String mode = args.optString(0, "edge");
+                final boolean fit = "fit".equalsIgnoreCase(mode);
                 fitMode = fit;
                 final Window window = cordova.getActivity().getWindow();
                 final View content = webView.getView();

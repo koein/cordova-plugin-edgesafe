@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<plugin id="cordova-plugin-edgesafe" version="1.3.0"
+<plugin id="cordova-plugin-edgesafe" version="1.4.0"
         xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android">
 
   <name>Edge Safe</name>
-  <description>Android edge-to-edge safety for Cordova WebView. Default = FIT (below bars). EDGE mode now uses layout MARGINS so fixed elements stay inside.</description>
+  <description>Android edge-to-edge safety for Cordova WebView. Default = EDGE. IME-aware: shrinks WebView using margins (no CSS needed).</description>
   <license>MIT</license>
   <keywords>cordova, android, windowinsets, edge-to-edge, safe-area</keywords>
 
@@ -25,8 +25,8 @@
       </feature>
     </config-file>
 
-    <preference name="EdgeSafeMode" default="fit" />
-    <preference name="EdgeSafeTransparentBars" default="false" />
+    <preference name="EdgeSafeMode" default="edge" />
+    <preference name="EdgeSafeTransparentBars" default="true" />
     <preference name="EdgeSafeLightStatusBarIcons" default="true" />
     <preference name="EdgeSafeLightNavBarIcons" default="true" />
     <preference name="EdgeSafeForceOpaqueBars" default="false" />

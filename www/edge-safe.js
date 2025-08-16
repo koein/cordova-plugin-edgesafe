@@ -22,8 +22,8 @@ var EdgeSafe = {
     }, function () {}, 'EdgeSafe', 'getInsets', []);
   },
 
-  setMode: function (mode /* 'fit' | 'edge' */) {
-    exec(function () {}, function () {}, 'EdgeSafe', 'setMode', [mode || 'fit']);
+  setMode: function (mode /* 'edge' | 'fit' */) {
+    exec(function () {}, function () {}, 'EdgeSafe', 'setMode', [mode || 'edge']);
   }
 };
 
