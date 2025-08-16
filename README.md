@@ -28,4 +28,8 @@ cordova.plugins.edgeSafe.setMode('fit');
 Notes: 
 - Color values: '#RRGGBB', '#AARRGGBB', 'transparent', or 'auto'.
 - Keep Android <preference name="fullScreen" value="false" />.
-- On gesture navigation, the nav bar background may be system/transparent; color is most visible on 3-button nav.
+- On Samsung / One UI (API 29+), the system may enforce contrast and draw a grey scrim. This plugin disables that when you set non-transparent colors, and you can explicitly control it:
+  ```js
+  cordova.plugins.edgeSafe.StatusBarContrastEnforced(false);
+  cordova.plugins.edgeSafe.NavBarContrastEnforced(false);
+  ```

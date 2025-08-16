@@ -43,9 +43,17 @@ var EdgeSafe = {
     exec(function () {}, function () {}, 'EdgeSafe', 'lightNavIcons', [!!on]);
   },
 
-  // Back-compat combined setter remains (unrelated to prefs)
+  // Back-compat combined setter
   setBarColors: function (statusBar, navBar, navDivider) {
     exec(function () {}, function () {}, 'EdgeSafe', 'setBarColors', [statusBar, navBar, navDivider]);
+  },
+
+  // Advanced (API 29+): explicitly toggle contrast enforcement (Samsung / One UI)
+  StatusBarContrastEnforced: function (on) {
+    exec(function () {}, function () {}, 'EdgeSafe', 'statusBarContrastEnforced', [!!on]);
+  },
+  NavBarContrastEnforced: function (on) {
+    exec(function () {}, function () {}, 'EdgeSafe', 'navBarContrastEnforced', [!!on]);
   }
 };
 

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<plugin id="cordova-plugin-edgesafe" version="1.6.4"
+<plugin id="cordova-plugin-edgesafe" version="1.6.5"
         xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android">
 
   <name>Edge Safe</name>
-  <description>Android edge-to-edge safety for Cordova WebView. Default = EDGE. IME-aware margins. Color + icon controls via simple runtime calls.</description>
+  <description>Android edge-to-edge safety for Cordova WebView. Default = EDGE. IME-aware margins. Color + icon controls with Samsung contrast handling.</description>
   <license>MIT</license>
   <keywords>cordova, android, windowinsets, edge-to-edge, safe-area, keyboard, ime, statusbar, navbar</keywords>
 
@@ -13,7 +13,6 @@
     <engine name="cordova-android" version=">=12.0.0" />
   </engines>
 
-  <!-- JS bridge -->
   <js-module src="www/edge-safe.js" name="EdgeSafe">
     <clobbers target="cordova.plugins.edgeSafe" />
   </js-module>
