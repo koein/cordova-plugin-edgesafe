@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.os.Build;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowManager;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
@@ -56,6 +57,14 @@ public class EdgeSafe extends CordovaPlugin {
                 try { window.setStatusBarColor(Color.TRANSPARENT); } catch (Throwable ignore) {}
                 try { window.setNavigationBarColor(Color.TRANSPARENT); } catch (Throwable ignore) {}
             }
+
+            // Ensure keyboard resizes the WebView without needing manifest <edit-config>
+            try {
+                window.setSoftInputMode(
+                    WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
+                    | WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN
+                );
+            } catch (Throwable ignore) {}
 
             WindowInsetsControllerCompat controller =
                     new WindowInsetsControllerCompat(window, webView.getView());

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<plugin id="cordova-plugin-edgesafe" version="1.0.0"
+<plugin id="cordova-plugin-edgesafe" version="1.0.1"
         xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android">
 
@@ -28,13 +28,6 @@
         <param name="android-package" value="com.weevi.edgesafe.EdgeSafe" />
       </feature>
     </config-file>
-
-    <!-- Ensure keyboard resizes WebView (not overlay) -->
-    <edit-config file="app/src/main/AndroidManifest.xml"
-                 target="/manifest/application/activity"
-                 mode="merge">
-      <activity android:windowSoftInputMode="adjustResize|stateHidden" />
-    </edit-config>
 
     <!-- Optional plugin preferences (override in app config.xml) -->
     <preference name="EdgeSafeApplyPadding" default="true" />

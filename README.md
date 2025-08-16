@@ -49,4 +49,4 @@ Override in your app `config.xml`:
 ## Notes
 - Do **not** set `<preference name="StatusBarOverlaysWebView" value="true" />` with this plugin.
 - Keep `<preference name="fullScreen" value="false" />` for Android.
-- The plugin enforces `adjustResize` so the keyboard behaves correctly.
+- Keyboard behavior (`adjustResize`) is now set at runtime to avoid manifest merge conflicts.

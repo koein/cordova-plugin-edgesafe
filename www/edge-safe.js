@@ -1,10 +1,6 @@
 var exec = require('cordova/exec');
 
 var EdgeSafe = {
-  /**
-   * Streams inset changes to JS and auto-updates CSS variables:
-   *   --safe-top, --safe-right, --safe-bottom, --safe-left
-   */
   watch: function (callback) {
     exec(function (insets) {
       try {
