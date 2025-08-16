@@ -60,6 +60,7 @@ public class EdgeSafe extends CordovaPlugin {
         final Window window = activity.getWindow();
 
         cordova.getActivity().runOnUiThread(() -> {
+            try { window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS); } catch (Throwable ignore) {}
             try {
                 window.setSoftInputMode(
                     WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
@@ -94,6 +95,7 @@ public class EdgeSafe extends CordovaPlugin {
     }
 
     private void applyColors(Window window, String status, String nav, String navDivider) {
+        try { window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS); } catch (Throwable ignore) {}
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Integer s = parseColorMaybe(status);
             Integer n = parseColorMaybe(nav);

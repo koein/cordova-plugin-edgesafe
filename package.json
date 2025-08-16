@@ -1,6 +1,6 @@
 {
   "name": "cordova-plugin-edgesafe",
-  "version": "1.6.1",
+  "version": "1.6.3",
   "description": "Cordova plugin: Android edge-to-edge safety. Default EDGE with IME-aware margins. Unprefixed prefs only. Runtime: StatusBarColor(), NavBarColor(), etc.",
   "license": "MIT",
   "author": "weevi / walid",
