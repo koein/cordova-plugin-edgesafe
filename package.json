@@ -1,10 +1,10 @@
 {
   "name": "cordova-plugin-edgesafe",
-  "version": "1.4.0",
-  "description": "Cordova plugin: Android edge-to-edge safety. Default EDGE; applies IME-aware margins so viewport avoids bars & keyboard (no CSS needed).",
+  "version": "1.6.1",
+  "description": "Cordova plugin: Android edge-to-edge safety. Default EDGE with IME-aware margins. Unprefixed prefs only. Runtime: StatusBarColor(), NavBarColor(), etc.",
   "license": "MIT",
   "author": "weevi / walid",
-  "homepage": "https://github.com/weevi/cordova-plugin-edgesafe",
+  "homepage": "https://github.com/<you>/cordova-plugin-edgesafe",
   "keywords": [
     "cordova",
     "android",
@@ -12,7 +12,9 @@
     "edge-to-edge",
     "safe-area",
     "keyboard",
-    "ime"
+    "ime",
+    "statusbar",
+    "navbar"
   ],
   "cordova": {
     "id": "cordova-plugin-edgesafe",

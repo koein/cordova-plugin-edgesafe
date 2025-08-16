@@ -24,6 +24,28 @@ var EdgeSafe = {
 
   setMode: function (mode /* 'edge' | 'fit' */) {
     exec(function () {}, function () {}, 'EdgeSafe', 'setMode', [mode || 'edge']);
+  },
+
+  // Individual runtime controls (no 'set' prefix)
+  StatusBarColor: function (color) {
+    exec(function () {}, function () {}, 'EdgeSafe', 'statusBarColor', [color]);
+  },
+  NavBarColor: function (color) {
+    exec(function () {}, function () {}, 'EdgeSafe', 'navBarColor', [color]);
+  },
+  NavBarDividerColor: function (color) {
+    exec(function () {}, function () {}, 'EdgeSafe', 'navBarDividerColor', [color]);
+  },
+  LightStatusBarIcons: function (on) {
+    exec(function () {}, function () {}, 'EdgeSafe', 'lightStatusIcons', [!!on]);
+  },
+  LightNavBarIcons: function (on) {
+    exec(function () {}, function () {}, 'EdgeSafe', 'lightNavIcons', [!!on]);
+  },
+
+  // Back-compat combined setter remains (unrelated to prefs)
+  setBarColors: function (statusBar, navBar, navDivider) {
+    exec(function () {}, function () {}, 'EdgeSafe', 'setBarColors', [statusBar, navBar, navDivider]);
   }
 };
 

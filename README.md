@@ -1,32 +1,31 @@
 # cordova-plugin-edgesafe
 
 Android edge-to-edge safety for Cordova WebView.  
-**Default mode = `edge`** and the plugin applies **IME-aware margins** so the viewport avoids the status bar, nav bar, **and the on-screen keyboard**. No app CSS changes required.
+**Default mode = `edge`** (IME-aware margins so viewport avoids bars & keyboard).  
+**Unprefixed-only config** + **simple runtime API (no 'set' prefix)**.
 
-## Install
-```bash
-cordova plugin add https://github.com/<you>/cordova-plugin-edgesafe.git
-# or via config.xml:
-# <plugin name="cordova-plugin-edgesafe" spec="https://github.com/<you>/cordova-plugin-edgesafe.git" />
-```
-
-## Configure (optional)
+## Config (`config.xml`)
 ```xml
-<preference name="EdgeSafeMode" value="edge" />   <!-- or 'fit' -->
-<preference name="EdgeSafeTransparentBars" value="true" />
-<preference name="EdgeSafeForceOpaqueBars" value="false" />
+<preference name="StatusBarColor" value="#000000" />
+<preference name="NavBarColor" value="#000000" />
+<preference name="NavBarDividerColor" value="#1F000000" />
+<preference name="LightStatusBarIcons" value="true" />
+<preference name="LightNavBarIcons" value="true" />
 ```
+(Old `EdgeSafe*` preference names are **not** supported.)
 
 ## Runtime
 ```js
-document.addEventListener('deviceready', function () {
-  // Default is edge (no call required). To switch:
-  // cordova.plugins.edgeSafe.setMode('fit');
-});
+cordova.plugins.edgeSafe.StatusBarColor('#000000');
+cordova.plugins.edgeSafe.NavBarColor('#000000');
+cordova.plugins.edgeSafe.NavBarDividerColor('#1F000000');
+cordova.plugins.edgeSafe.LightStatusBarIcons(true);
+cordova.plugins.edgeSafe.LightNavBarIcons(true);
+
+// Mode switch if needed
+// cordova.plugins.edgeSafe.setMode('fit');
 ```
 
-### Notes
-- Keep `<preference name="fullScreen" value="false" />` for Android.
-- Remove any conflicting immersive/fullscreen calls from other plugins or set them after deviceready then re-call `setMode('edge')` to re-assert.
-- Keyboard resizing is handled via IME insets + margins (no CSS).
-
+Notes:
+- Color values: `'#RRGGBB'`, `'#AARRGGBB'`, `'transparent'`, or `'auto'`.
+- Keep Android `<preference name="fullScreen" value="false" />`.
