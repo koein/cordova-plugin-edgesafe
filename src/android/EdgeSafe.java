@@ -8,6 +8,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
@@ -73,10 +75,32 @@ public class EdgeSafe extends CordovaPlugin {
                 window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             } catch (Throwable ignore) {}
 
+            // Always apply TextZoom=100 to the app WebView
+            try {
+                WebView wv = findWebView(webView.getView());
+                if (wv != null) {
+                    WebSettings settings = wv.getSettings();
+                    settings.setTextZoom(100);
+                }
+            } catch (Throwable ignore) {}
+
             applyIconAppearance(window, webView.getView(), lightStatusIcons, lightNavIcons);
             applyMode(window, webView.getView(), fitMode);
             applyColors(window, statusBarColorPref, navBarColorPref, navBarDividerColorPref);
         });
+    }
+
+    // Locate the real WebView even if wrapped
+    private WebView findWebView(View v) {
+        if (v instanceof WebView) return (WebView) v;
+        if (v instanceof ViewGroup) {
+            ViewGroup g = (ViewGroup) v;
+            for (int i = 0; i < g.getChildCount(); i++) {
+                WebView w = findWebView(g.getChildAt(i));
+                if (w != null) return w;
+            }
+        }
+        return null;
     }
 
     // --- Icon contrast ---
@@ -93,11 +117,9 @@ public class EdgeSafe extends CordovaPlugin {
     private Integer parseColorMaybe(String value) {
         if (value == null) return null;
         String v = value.trim().toLowerCase();
-        if (TextUtils.isEmpty(v) || "auto".equals(v)) return null; // no change
+        if (TextUtils.isEmpty(v) || "auto".equals(v)) return null;
         if ("transparent".equals(v)) return Color.TRANSPARENT;
-        try {
-            return Color.parseColor(v); // #RRGGBB or #AARRGGBB
-        } catch (Throwable ignore) {}
+        try { return Color.parseColor(v); } catch (Throwable ignore) {}
         return null;
     }
 
@@ -219,7 +241,6 @@ public class EdgeSafe extends CordovaPlugin {
             lastL = l; lastT = t; lastR = r; lastB = b;
             sendInsetsToJs(l, t, r, b);
 
-            // Re-assert any runtime-set colors/icons (guards against other plugins/theme)
             if (lastStatusColor != null || lastNavColor != null || lastDividerColor != null) {
                 applyColors(cordova.getActivity().getWindow(), lastStatusColor, lastNavColor, lastDividerColor);
             }
